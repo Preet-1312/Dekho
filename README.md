@@ -1,244 +1,466 @@
-Grounding DINO Visual Navigation System
-Complete visual navigation system using Grounding DINO for object detection, Depth-Anything-V2 for depth estimation, with object tracking and path planning capabilities.
+# Grounding DINO Visual Navigation System
 
-🌟 Features
-Open Vocabulary Object Detection - Detects ANY object based on text prompts (not limited to fixed classes)
-Depth Estimation - Real-time depth mapping using Depth-Anything-V2
-Object Tracking - Multi-object tracking across frames with velocity estimation
-Path Planning - Real-time navigation guidance with risk assessment and directional arrows
-Video Processing - Process video files and save annotated output
-Live Camera Support - Works with webcam, DroidCam, IP cameras
-📋 Requirements
-System Requirements
-Python 3.8+
-CUDA-capable GPU (recommended for real-time performance)
-8GB+ RAM
-Ubuntu/Linux (tested), Windows, or macOS
-Python Dependencies
+A computer vision-based visual navigation system that combines **Grounding DINO** for open-vocabulary object detection and **Depth Anything V2** for monocular depth estimation. The system detects obstacles, tracks objects across video frames, assesses potential risks, and generates directional navigation guidance.
+
+Designed for applications such as assistive navigation for visually impaired individuals, robotics, obstacle avoidance, and intelligent video analysis.
+
+## 🌟 Features
+
+- **Open-Vocabulary Object Detection:** Detect objects using text prompts instead of relying only on fixed object classes.
+- **Depth Estimation:** Estimate relative scene depth using Depth Anything V2.
+- **Multi-Object Tracking:** Track detected objects across frames using Intersection over Union (IoU) matching and estimate their movement.
+- **Path Planning:** Analyze obstacle positions and estimated risks to recommend safer movement directions.
+- **Real-Time Navigation Guidance:** Display directional arrows, risk levels, and navigation instructions.
+- **Video Processing:** Analyze video files frame by frame and save annotated output.
+- **Live Camera Support:** Supports webcams and compatible network camera streams, including DroidCam.
+- **Performance Optimization:** Includes configurable resolution, frame skipping, and mixed-precision inference options.
+
+## 🛠️ Tech Stack
+
+| Component | Technology |
+|---|---|
+| Programming Language | Python |
+| Object Detection | Grounding DINO |
+| Depth Estimation | Depth Anything V2 |
+| Deep Learning Framework | PyTorch |
+| Model Integration | Hugging Face Transformers |
+| Computer Vision | OpenCV |
+| Numerical Processing | NumPy, SciPy |
+| Image Processing | Pillow |
+
+## 🏗️ System Architecture
+
+The system processes input images or video frames through the following pipeline:
+
+1. **Input Acquisition:** Read an image, video file, webcam stream, or compatible IP camera feed.
+2. **Object Detection:** Grounding DINO detects objects based on text prompts.
+3. **Depth Estimation:** Depth Anything V2 generates a relative depth map of the scene.
+4. **Object Tracking:** Associate detections across consecutive frames and estimate object movement.
+5. **Risk Assessment:** Evaluate detected obstacles using their image positions and estimated relative depth.
+6. **Path Planning:** Recommend a direction based on obstacle positions and assessed risk.
+7. **Visualization:** Display bounding boxes, depth information, risk indicators, and navigation instructions.
+
+## 📋 Requirements
+
+### System Requirements
+
+- Python 3.8 or later, subject to compatibility with the installed dependencies.
+- 8 GB RAM or more recommended.
+- NVIDIA GPU with CUDA support recommended for faster inference.
+- Windows, Linux, or macOS.
+- Internet connection for downloading model weights on the first run.
+
+### Python Dependencies
+
+Install the required libraries:
+
+```bash
 pip install torch torchvision transformers opencv-python numpy scipy pillow
-Required Models
-Models will be downloaded automatically on first run:
+```
 
-IDEA-Research/grounding-dino-tiny (~400MB)
-depth-anything/Depth-Anything-V2-Small-hf (~100MB)
-🎥 DroidCam Setup
-DroidCam allows you to use your smartphone as a wireless camera.
+For GPU acceleration, install the PyTorch version compatible with your CUDA environment. Refer to the [official PyTorch installation guide](https://pytorch.org/get-started/locally/).
 
-Option 1: DroidCam App (Easiest)
-On Android/iOS:
-Download DroidCam from Play Store or App Store
-Install and open the app
-Note the IP address and port shown in the app (e.g., 192.168.1.100:4747)
-Ensure phone and computer are on the same WiFi network
-On Your Computer:
-# Test the connection first
-firefox http://192.168.1.100:4747/video
-# Replace IP with your phone's IP from the app
+### Pretrained Models
 
-# If you see the camera feed, you're ready!
-🚀 Usage
-1. Test on Image
-Process a single image with detection, depth, and path planning:
+The system uses the following Hugging Face models:
 
-python3 final.py image.jpg
-Output:
+- **Object Detection:** [IDEA-Research/grounding-dino-tiny](https://huggingface.co/IDEA-Research/grounding-dino-tiny)
+- **Depth Estimation:** [depth-anything/Depth-Anything-V2-Small-hf](https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf)
 
-Terminal: List of detected objects with depth and confidence
-File: output_gdino.jpg with visualizations
-2. Process Video File
-Process an entire video with frame-by-frame analysis:
+Model weights are downloaded automatically when supported by the implementation and available network access.
 
-python3 final.py --video input_video.mp4
-Output:
+## 🚀 Installation
 
-results/output_input_video.mp4 - Annotated video
-results/frames/ - Individual processed frames
-Features:
+### 1. Clone the Repository
 
-Progress bar with ETA
-Object tracking across frames
-Navigation guidance overlaid
-Frame-by-frame saving
-3. Live Camera (Webcam)
-Use built-in webcam:
+```bash
+git clone https://github.com/Preet-1312/Dekho.git
+cd Dekho
+```
 
-python3 final.py --live
-4. Live Camera (DroidCam via WiFi)
-Using DroidCam over WiFi:
+### 2. Create a Virtual Environment
 
-# Method 1: Specify IP directly
-python3 final.py --live --ip 192.168.1.100 --port 4747
+**Windows:**
 
-# Method 2: Use full URL
-python3 final.py --live --url http://192.168.1.100:4747/video
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
 
-# For IP Webcam app (default port 8080)
-python3 final.py --live --ip 192.168.1.100 --port 8080
-5. Custom Text Prompts
-Test detection with specific object categories:
+**Linux/macOS:**
 
-python3 final.py --custom image.jpg
-This will test multiple prompts:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
-"person. human. people."
-"furniture. chair. table. bed. couch."
-"luggage. suitcase. bag. backpack. box."
-"all objects. everything. anything visible."
-⌨️ Interactive Controls (Live Mode)
-When running in live mode, use these keyboard shortcuts:
+### 3. Install Dependencies
 
-Key	Action
-q	Quit
-t	Toggle depth estimation on/off
-p	Toggle path planning on/off
-🎛️ Configuration Options
-Performance Tuning
-Edit these parameters in the code for your hardware:
+```bash
+python -m pip install --upgrade pip
+pip install torch torchvision transformers opencv-python numpy scipy pillow
+```
 
+### 4. Run the Application
+
+Ensure that `final.py` is located in the project directory and use the commands below.
+
+## 🎥 Usage
+
+### 1. Object Detection on an Image
+
+Process a single image:
+
+```bash
+python final.py image.jpg
+```
+
+Replace `image.jpg` with the path to your input image.
+
+**Expected output:**
+- Detected objects and confidence scores in the terminal.
+- Estimated relative depth values, where supported by the implementation.
+- Annotated image saved as `output_gdino.jpg`, as configured by the script.
+
+### 2. Process a Video File
+
+```bash
+python final.py --video input_video.mp4
+```
+
+Replace `input_video.mp4` with your video filename.
+
+**Expected output:**
+- Frame-by-frame object detection and depth estimation.
+- Object tracking and navigation guidance.
+- Annotated video saved under the `results/` directory, if configured by the script.
+- Processed frames and progress information, depending on the implementation.
+
+### 3. Use the Built-in Webcam
+
+```bash
+python final.py --live
+```
+
+This starts live navigation using the default camera device, provided that the script supports this option and the camera is accessible.
+
+### 4. Use DroidCam over Wi-Fi
+
+DroidCam allows a smartphone to act as a network camera.
+
+**Setup:**
+
+1. Install and open DroidCam on your smartphone.
+2. Connect your smartphone and computer to the same Wi-Fi network.
+3. Note the phone's IP address and the port displayed by the app.
+4. Test the video stream in your browser.
+
+For example:
+
+```text
+http://192.168.1.100:4747/video
+```
+
+Replace the example IP address and port with the values displayed by your app.
+
+**Connect using the IP address and port:**
+
+```bash
+python final.py --live --ip 192.168.1.100 --port 4747
+```
+
+**Alternatively, provide the full video URL:**
+
+```bash
+python final.py --live --url http://192.168.1.100:4747/video
+```
+
+For a compatible IP Webcam setup using port `8080`:
+
+```bash
+python final.py --live --ip 192.168.1.100 --port 8080
+```
+
+The correct stream URL and port depend on the camera application and its configuration.
+
+### 5. Test Custom Object Prompts
+
+```bash
+python final.py --custom image.jpg
+```
+
+This mode can be used to test different text prompts, depending on the prompts configured in the application.
+
+Example prompt categories:
+
+- People: `person`, `human`, `people`
+- Furniture: `chair`, `table`, `bed`, `couch`
+- Bags: `luggage`, `suitcase`, `backpack`, `bag`
+- General objects: descriptive text for objects visible in the scene
+
+Grounding DINO supports text-conditioned detection, but detection quality depends on the prompt, model, image, and confidence threshold.
+
+## ⌨️ Interactive Controls
+
+During live mode, the following keyboard controls are available if implemented in the application:
+
+| Key | Action |
+|---|---|
+| `q` | Quit the application |
+| `t` | Toggle depth estimation |
+| `p` | Toggle path planning |
+
+## 🎛️ Configuration and Performance Tuning
+
+The following example illustrates configuration options that may be available in the detector implementation:
+
+```python
 detector = GroundingDinoDetector(
-    model_size='tiny',      # 'tiny' (faster) or 'base' (more accurate)
-    depth_size='small',     # 'small', 'base', or 'large'
-    use_fp16=True,         # Use mixed precision (2x faster on GPU)
-    max_resolution=512     # Lower = faster (384, 448, 512, 640)
+    model_size="tiny",
+    depth_size="small",
+    use_fp16=True,
+    max_resolution=512
 )
-For slower systems:
+```
 
-max_resolution=384 - Faster processing
-model_size='tiny' - Lightweight model
-Process every 4th frame instead of 3rd
-For better accuracy:
+Use these settings only if the corresponding parameters are supported by your implementation.
 
-max_resolution=640 or higher
-model_size='base' - More accurate
-depth_size='base' - Better depth
-Detection Threshold
-Adjust sensitivity:
+### Performance Optimization
 
-# Lower threshold = more detections (may include false positives)
-detections = detector.detect(frame, score_threshold=0.20)
+For lower-end systems:
 
-# Higher threshold = fewer, more confident detections
-detections = detector.detect(frame, score_threshold=0.35)
-📊 Output Interpretation
-Visual Indicators
-Bounding Boxes:
+- Use a smaller detection model.
+- Reduce processing resolution to `384` or another supported value.
+- Process fewer video frames.
+- Disable depth estimation when it is not required, if supported.
+- Close other GPU-intensive applications.
 
-🔴 Red - Object very close (depth > 0.7) - CRITICAL
-🟠 Orange - Object close (depth 0.5-0.7) - HIGH RISK
-🟡 Yellow - Object medium distance (depth 0.3-0.5) - MEDIUM RISK
-🟢 Green - Object far (depth < 0.3) - LOW RISK
-Navigation Arrow:
+For better detection and depth detail:
 
-Points in recommended direction to avoid obstacles
-Color matches highest risk level
-Angle shown in degrees (0° = straight)
-Instructions:
+- Increase the processing resolution.
+- Use a larger supported model variant.
+- Adjust the confidence threshold based on the scene.
 
-"STOP! person ahead!" - Critical danger
-"Move left, chair approaching" - High risk
-"Bear right, obstacle ahead" - Medium risk
-"Path clear" - Safe to proceed
-Terminal Output
+Larger models and higher resolutions generally increase computational requirements and may reduce real-time performance.
+
+### Detection Confidence Threshold
+
+A lower confidence threshold can increase the number of detections but may introduce false positives. A higher threshold can reduce false positives but may miss objects.
+
+Example:
+
+```python
+detections = detector.detect(
+    frame,
+    score_threshold=0.20
+)
+```
+
+The detector API and threshold parameter should match the actual implementation.
+
+## 📊 Output Interpretation
+
+### Bounding Boxes and Risk Indicators
+
+The navigation visualization may use color-coded indicators to communicate estimated obstacle risk.
+
+| Color | Intended Meaning |
+|---|---|
+| 🔴 Red | Critical risk — obstacle estimated to be very close |
+| 🟠 Orange | High risk — nearby obstacle |
+| 🟡 Yellow | Medium risk — obstacle requiring attention |
+| 🟢 Green | Lower risk — obstacle estimated to be farther away |
+
+These categories depend on the depth normalization and risk thresholds implemented in the application.
+
+**Important:** Depth Anything V2 estimates relative depth from a single image. Its raw output is not automatically a calibrated physical distance in meters. Risk estimates should therefore be treated as approximate unless the system includes appropriate calibration.
+
+### Navigation Guidance
+
+Example navigation instructions may include:
+
+- `STOP! Person ahead!`
+- `Move left, obstacle approaching`
+- `Bear right, obstacle ahead`
+- `Path clear`
+
+The actual instructions depend on the detected objects, estimated depth, risk assessment, and path-planning logic.
+
+### Example Terminal Output
+
+Illustrative output:
+
+```text
 Found 5 objects:
 
-  1. suitcase            | conf=0.852 | d=0.784  ← Very close!
-  2. person              | conf=0.921 | d=0.645  ← Close
-  3. chair               | conf=0.743 | d=0.412  ← Medium
-  4. table               | conf=0.681 | d=0.298  ← Far
-  5. backpack            | conf=0.567 | d=0.156  ← Very far
+1. suitcase  | confidence=0.852 | depth=0.784
+2. person    | confidence=0.921 | depth=0.645
+3. chair     | confidence=0.743 | depth=0.412
+4. table     | confidence=0.681 | depth=0.298
+5. backpack  | confidence=0.567 | depth=0.156
 
 Path Planning:
-  Risk Level: HIGH
-  Direction: -25.0° (left)
-  Instruction: Move left, suitcase approaching
-🔧 Troubleshooting
-DroidCam Connection Issues
-Problem: Camera feed not accessible
+Risk Level: HIGH
+Direction: -25.0 degrees (left)
+Instruction: Move left, obstacle approaching
+```
 
-Solutions:
+The values above are examples and do not represent guaranteed output for every scene.
 
-Verify phone and PC on same WiFi network
-Check firewall isn't blocking the connection
-Try accessing http://PHONE_IP:PORT/video in browser first
-Restart DroidCam app on phone
-Use USB connection as fallback
-Low FPS / Slow Performance
-Problem: Getting < 5 FPS
+## 🔧 Troubleshooting
 
-Solutions:
+### 1. DroidCam Connection Issues
 
-Lower resolution: max_resolution=384
-Disable depth: Use with_depth=False
-Increase frame skip: Process every 5th frame
-Use CPU if GPU memory limited: Comment out use_fp16=True
-Close other GPU-intensive applications
-Model Download Fails
-Problem: "Connection timeout" or "Failed to download"
+**Problem:** The camera stream cannot be accessed.
 
-Solutions:
+**Possible solutions:**
 
-Check internet connection
-Try with VPN if huggingface.co is blocked
-Manually download models:
-# Download from https://huggingface.co/IDEA-Research/grounding-dino-tiny
-# Place in ~/.cache/huggingface/hub/
-CUDA Out of Memory
-Problem: "RuntimeError: CUDA out of memory"
+- Confirm that the phone and computer are on the same network.
+- Verify the IP address, port, and stream URL.
+- Test the stream URL in a browser.
+- Check firewall settings.
+- Restart the camera application.
+- Try a USB connection if supported.
 
-Solutions:
+### 2. Low FPS or Slow Performance
 
-Lower resolution: max_resolution=320
-Use smaller models: depth_size='small'
-Reduce batch processing
-Clear GPU cache more frequently
-Restart Python script
-No Objects Detected
-Problem: Not detecting objects that are clearly visible
+**Possible solutions:**
 
-Solutions:
+- Reduce the input resolution.
+- Use a smaller model variant.
+- Process fewer frames.
+- Disable optional processing stages when supported.
+- Check GPU utilization and available memory.
 
-Lower threshold: score_threshold=0.20
-Add specific keywords to prompt (see Custom Prompts)
-Improve lighting conditions
-Check if object is in the default prompt list
-Try model_size='base' for better accuracy
-🎯 Use Cases
-Visual Navigation for Visually Impaired - Real-time obstacle detection and guidance
-Robotics - Autonomous navigation in indoor environments
-Safety Systems - Detect hazards in work environments
-Video Analysis - Process surveillance or drone footage
-Research - Study object detection and depth estimation
-🔬 Technical Details
-Detection Pipeline
-Grounding DINO - Detects objects based on text prompts
-Depth-Anything-V2 - Estimates depth map from single image
-Tracker - Associates detections across frames using IoU matching
-Path Planner - Calculates safest direction based on obstacle positions and risks
-Optimizations Applied
-Mixed precision (FP16) for 2x GPU speedup
-Dynamic resolution scaling
-Frame skipping for real-time performance
-Explicit tensor cleanup to prevent memory leaks
-Cached model weights
-📝 Example Commands
-# Quick test on image
-python3 final.py test_image.jpg
+### 3. Model Download Errors
 
-# Process video with all features
-python3 final.py --video walking_test.mp4
+**Possible solutions:**
 
-# Live navigation with DroidCam
-python3 final.py --live --ip 192.168.1.100 --port 4747
+- Check your internet connection.
+- Verify that the model repository is accessible.
+- Check Hugging Face model availability.
+- Retry the download and inspect the error message.
 
-# Test custom object categories
-python3 final.py --custom my_image.jpg
+### 4. CUDA Out-of-Memory Error
 
-# Use built-in webcam
-python3 final.py --live
-🆘 Support
-For issues or questions:
+**Possible solutions:**
 
-Check troubleshooting section above
-Verify all dependencies are installed
-Test with provided sample image first
-Check GPU availability: nvidia-smi
+- Reduce image resolution.
+- Use smaller models.
+- Close other GPU-intensive applications.
+- Use CPU inference if necessary and supported.
+- Restart the application to release allocated resources.
+
+### 5. Objects Are Not Detected
+
+**Possible solutions:**
+
+- Try a more descriptive text prompt.
+- Adjust the confidence threshold.
+- Improve image lighting and visibility.
+- Test a different model variant if supported.
+- Check whether the model and processor loaded correctly.
+
+### 6. Camera Is Not Detected
+
+**Possible solutions:**
+
+- Verify that the camera is connected and accessible.
+- Close other applications using the camera.
+- Check the camera index or network stream URL.
+- Confirm that the OpenCV installation supports the required video backend.
+
+## 🎯 Use Cases
+
+- **Assistive Navigation:** Prototype obstacle detection and directional guidance for visually impaired users.
+- **Robotics:** Support perception and obstacle-awareness components in robotic navigation.
+- **Safety Monitoring:** Identify potential obstacles in indoor or industrial environments.
+- **Video Analysis:** Analyze recorded footage for object detection and movement.
+- **Computer Vision Research:** Experiment with open-vocabulary detection, monocular depth estimation, tracking, and path planning.
+
+This project is a navigation prototype, not a certified safety system. It should not be relied upon as the sole means of navigation or obstacle avoidance in real-world environments.
+
+## 🔬 Technical Details
+
+### Grounding DINO
+
+Grounding DINO performs open-vocabulary object detection by associating image regions with text descriptions. This enables the system to detect a wide range of objects without being restricted to a fixed set of predefined classes.
+
+### Depth Anything V2
+
+Depth Anything V2 estimates depth information from a single image. The resulting depth map helps the application reason about the relative positions of detected obstacles.
+
+### Object Tracking
+
+The tracking component associates detections across consecutive frames using Intersection over Union (IoU) matching. Tracking can help maintain object identities and estimate movement over time.
+
+### Path Planning
+
+The path-planning component combines obstacle positions and estimated risk to recommend a direction. The quality of its guidance depends on the accuracy of detection, depth estimation, tracking, and risk thresholds.
+
+### Performance Optimizations
+
+Depending on the implementation, performance optimizations may include:
+
+- Mixed-precision inference.
+- Dynamic input resolution.
+- Video frame skipping.
+- Model-weight caching.
+- Explicit tensor and GPU memory cleanup.
+
+## 📝 Quick Reference
+
+```bash
+# Run detection on an image
+python final.py image.jpg
+
+# Process a video
+python final.py --video input_video.mp4
+
+# Start webcam navigation
+python final.py --live
+
+# Start DroidCam navigation
+python final.py --live --ip 192.168.1.100 --port 4747
+
+# Start navigation using a full stream URL
+python final.py --live --url http://192.168.1.100:4747/video
+
+# Test custom prompts
+python final.py --custom image.jpg
+
+# Check NVIDIA GPU availability
+nvidia-smi
+```
+
+## 🚧 Future Improvements
+
+- Improve depth calibration and obstacle-distance estimation.
+- Enhance multi-object tracking in crowded environments.
+- Develop more robust path planning for dynamic obstacles.
+- Optimize inference for low-power devices.
+- Add audio-based navigation alerts.
+- Evaluate navigation performance across varied lighting and environments.
+
+## 🤝 Contributing
+
+Contributions, suggestions, and bug reports are welcome.
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Implement and test your changes.
+4. Submit a pull request describing the changes.
+
+## 📄 License
+
+Add a `LICENSE` file to specify the terms under which this project may be used, modified, and distributed.
+
+## 👨‍💻 Author
+
+**Preet Dhote**
+
+GitHub: [@Preet-1312](https://github.com/Preet-1312)
+
+---
+
+If you find this project useful, consider giving the repository a ⭐ on GitHub.
